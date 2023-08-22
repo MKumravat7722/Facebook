@@ -14,6 +14,14 @@ Rails.application.routes.draw do
   resources :posts do
     resources :likes ,only: [:create,:destroy,:show]
   end
+  # resources :users do 
+  #   member do 
+  #     post 'create'
+  #   end
+  # end 
+  resources :photos do
+    get 'preview', on: :member
+  end
   resources :users do
   resources :notifications, only: [:index]
   end
