@@ -1,73 +1,73 @@
 class UsersController < ApplicationController
-  skip_before_action :authenticate_user, only: :create
-  before_action :set_user,only:[:show,:update,:destroy]
+  
   def index
-    @users=User.all 
-    render json: @users
-    # redirect_to "/user/#{11}/notifications"
-    # redirect_to "/posts/#{user_id}"
-    # /user/:user_id/notifications
+    render json: @current_user
   end
+  
   def show
-    if @user
-     render json: @user
-    else  
-      render json: {error: 'Unable to Show User Or Id not found'},status: 400    
-    end
-  end
-  def new
-     @user=User.new
-  end
-  def user_post
-    @user=User.find(params[:id])
-    follower_ids = @user.followers.pluck(:follower_id)
-    followee_ids = @user.followees.pluck(:followee_id)
-    post_user_ids = (follower_ids + followee_ids + [@user.id]).uniq
+    follower_ids = @current_user.followers.pluck(:follower_id)
+    followee_ids = @current_user.followees.pluck(:followee_id)
+    post_user_ids = (follower_ids + followee_ids + [@current_user.id]).uniq
     @posts = Post.where(user_id: post_user_ids)
     render json: @posts
   end
+  
+  def new
+    @user=User.new
+  end
+  
   def create
-    
-    @user =User.new(user_params)
-    if @user.save 
-       render json: @user, status: 201
+    user =User.new(user_params)
+    if user.save
+      render json: @user, status: 201
     else
-      render json: {error: @user.errors.full_messages}   
+      render json: {error: @user.errors.full.messages}, status: 400
     end
   end
-
+  
   def update
-    if @user.update(user_params)
-        #redirect_to(@user)
-        render json: @user,status: 200
+    if @current_user.update(user_params)
+      render json: @current_user,status: 200
     else
-      render json: {error: 'User Not Found'},status: 404  
+      render json: {error: @current_user.errors.full_messages},status: 404
     end
   end
+  
   def destroy
-    @user.destroy
+    @current_user.destroy
     render json:'User Deleted Succesfully..'
   end
+  # def follow
+  #   @user = User.find(params[:id])
+  #   current_user.followees << @user
+  #   render 
+  # end
+  # def unfollow
+  #   @user = User.find(params[:id])
+  #   current_user.followed_users.find_by(followee_id: @user.id).destroy
+  #   redirect_back(fallback_location: user_path(@user))
+  # end
   def follow
-    @user = User.find(params[:id])
-    current_user.followees << @user
-    render 
+    user = User.find(params[:id])
+    current_user.followees << user
+    render json: user
   end
+  
   def unfollow
-    @user = User.find(params[:id])
+    user = User.find(params[:id])
     current_user.followed_users.find_by(followee_id: @user.id).destroy
-    redirect_back(fallback_location: user_path(@user))
+    render json: user
   end
-  private def set_user
-    @user=User.find(params[:id])
-  end
+  
+  
+  
   private def user_params 
     params.permit(
       :first_name,
       :last_name,
       :username,
       :email,
-      :password_digest,
+      :password,
       :profile_picture
     )
   end

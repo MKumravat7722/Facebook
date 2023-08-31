@@ -1,5 +1,6 @@
 class User < ApplicationRecord
-   # has_secure_password
+   has_secure_password
+   has_one_attached :profile_picture
    has_many :posts, -> { order(created_at: :desc) }, dependent: :destroy
    has_many :comments, dependent: :destroy
    has_many :likes, dependent: :destroy  
@@ -14,7 +15,6 @@ class User < ApplicationRecord
    validates :last_name, presence: true
    validates :email, presence: true, uniqueness: true
    validates :username, presence: true, uniqueness: true
-   validates :password_digest, presence: true, length: { minimum: 6 }
    validate  :validate_email
    def validate_email
       if (email =~ /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$/).nil?
