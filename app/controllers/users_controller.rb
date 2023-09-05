@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  
+  skip_before_action :authenticate_user,only: :create
   def index
     render json: @current_user
   end
@@ -17,11 +17,12 @@ class UsersController < ApplicationController
   end
   
   def create
-    user =User.new(user_params)
-    if user.save
+    @user =User.new(user_params)
+    if @user.save
+      UserMailer.with(user: @user).welcome_email.deliver_now
       render json: @user, status: 201
     else
-      render json: {error: @user.errors.full.messages}, status: 400
+      render json: {error: @user.errors.full_messages}, status: 400
     end
   end
   

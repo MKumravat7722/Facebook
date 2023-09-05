@@ -1,6 +1,5 @@
 class PostsController < ApplicationController
   
-  
   def index
    render json: @current_user.posts
   end
@@ -36,13 +35,10 @@ class PostsController < ApplicationController
       render json: { error: "Unable to delete this post" }
     end
   end
+  
   private
   def post_params
-    params.permit(
-      :caption,
-      :image,
-      :user_id
-    )
+    params.require(:posts).permit(:caption, photos: [])
   end
 
 end
